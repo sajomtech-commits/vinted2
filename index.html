@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="theme-color" content="#c084fc">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='80' fill='%23c084fc'/%3E%3Ctext x='256' y='345' font-size='280' text-anchor='middle' fill='white'%3E%F0%9F%91%94%3C/text%3E%3C/svg%3E">
+<title>Vinted2 — Gestion Ventes</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0f0f1a;--card:#1a1a2e;--card2:#16162a;--border:#2a2a4a;--text:#e0e0e0;--muted:#888;--muted2:#666;--accent:#c084fc;--accent2:#a855f7;--green:#22c55e;--red:#ef4444;--yellow:#fbbf24;--blue:#3b82f6;--orange:#f97316;--radius:12px;--radius-lg:16px}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100dvh;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.container{max-width:1100px;margin:0 auto;padding:1rem .75rem}
+
+/* HEADER */
+header{display:flex;align-items:center;justify-content:space-between;gap:.6rem;margin-bottom:1rem;flex-wrap:wrap}
+header .hd-l{display:flex;align-items:center;gap:.5rem}
+header h1{font-size:1.8rem;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--blue),var(--green));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:-.5px}
+header .sub{font-size:.8rem;color:var(--muted)}
+.hd-r{display:flex;gap:.4rem;align-items:center}
+.search-btn,.config-btn{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:.45rem .7rem;color:var(--muted);cursor:pointer;font-size:1rem;transition:all .15s;line-height:1}
+.search-btn:hover,.config-btn:hover{background:var(--border);color:var(--text)}
+.config-btn{font-size:.85rem;padding:.4rem .65rem}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:.5rem;margin-bottom:1rem}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:.65rem .8rem;text-align:center;cursor:pointer;transition:all .15s;position:relative;overflow:hidden}
+.stat:active{transform:scale(.97)}
+.stat .icon{position:absolute;right:-4px;bottom:-4px;font-size:2.5rem;opacity:.07;pointer-events:none}
+.stat .num{font-size:1.3rem;font-weight:800;letter-spacing:-.5px}
+.stat .lbl{font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;margin-top:2px}
+.stat.accent{background:linear-gradient(135deg,rgba(192,132,252,.12),rgba(59,130,246,.08));border-color:var(--accent)}
+.stat.accent .num{color:var(--accent)}
+.stat.green{background:linear-gradient(135deg,rgba(34,197,94,.1),rgba(34,197,94,.04));border-color:rgba(34,197,94,.3)}
+.stat.green .num{color:var(--green)}
+.stat.red .num{color:var(--red)}
+.stat.orange{background:linear-gradient(135deg,rgba(249,115,22,.1),rgba(249,115,22,.04));border-color:rgba(249,115,22,.3)}
+.stat.orange .num{color:var(--orange)}
+.stat.blue .num{color:var(--blue)}
+
+/* FILTER TABS */
+.tabs{display:flex;gap:.3rem;margin-bottom:.8rem;flex-wrap:wrap}
+.tab{padding:.4rem .9rem;border-radius:20px;border:1px solid var(--border);background:var(--card);color:var(--muted);cursor:pointer;font-size:.8rem;font-weight:500;transition:all .15s;white-space:nowrap}
+.tab:hover{border-color:var(--accent);color:var(--accent)}
+.tab.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.tab .cnt{display:inline-block;background:rgba(255,255,255,.15);border-radius:10px;padding:0 6px;margin-left:4px;font-size:.7rem;font-weight:600}
+
+/* SEARCH BAR */
+.search-bar{display:flex;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:0 .8rem;gap:.5rem;margin-bottom:.8rem;transition:border-color .15s}
+.search-bar:focus-within{border-color:var(--accent)}
+.search-bar .s-icon{font-size:1rem;opacity:.4}
+.search-bar input{border:none;background:none;padding:.7rem 0;font-size:.9rem;width:100%;outline:none;color:var(--text)}
+.search-bar input::placeholder{color:var(--muted2)}
+
+/* GRID */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:.6rem}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:.9rem;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.card:active{transform:scale(.98)}
+.card:hover{border-color:var(--accent);box-shadow:0 0 20px rgba(192,132,252,.08)}
+.card .top{display:flex;justify-content:space-between;align-items:flex-start;gap:.5rem;margin-bottom:.4rem}
+.card .nom{font-size:.95rem;font-weight:700;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;flex:1}
+.card .badge{display:inline-block;padding:.15rem .6rem;border-radius:20px;font-size:.65rem;font-weight:600;white-space:nowrap;flex-shrink:0;margin-top:2px}
+.badge-stock{background:rgba(59,130,246,.15);color:var(--blue)}
+.badge-vendu{background:rgba(34,197,94,.15);color:var(--green)}
+.badge-donne{background:rgba(239,68,68,.15);color:var(--red)}
+.card .infos{font-size:.78rem;color:var(--muted);display:flex;flex-wrap:wrap;gap:2px 10px;margin-bottom:.3rem}
+.card .infos span{display:inline-flex;align-items:center;gap:3px}
+.card .prix{font-size:1.05rem;font-weight:700}
+.card .prix.green{color:var(--green)}
+.card .prix.orange{color:var(--orange)}
+.card .bottom{display:flex;justify-content:space-between;align-items:center;margin-top:.3rem;padding-top:.4rem;border-top:1px solid var(--border)}
+.card .bottom .date{font-size:.72rem;color:var(--muted2)}
+.card .marge{font-size:.75rem;font-weight:600}
+.card .marge.pos{color:var(--green)}
+.card .marge.neg{color:var(--red)}
+
+/* TABLE VIEW (desktop) */
+.table-wrap{display:none;overflow-x:auto;border-radius:var(--radius-lg);border:1px solid var(--border);background:var(--card)}
+table{width:100%;border-collapse:collapse;min-width:700px}
+thead{background:linear-gradient(135deg,#1e1e3a,#2a1a3a)}
+th{padding:.6rem .7rem;text-align:left;font-weight:600;font-size:.7rem;text-transform:uppercase;letter-spacing:.3px;color:var(--accent);white-space:nowrap}
+td{padding:.55rem .7rem;border-top:1px solid var(--border);font-size:.8rem;vertical-align:middle}
+tr:hover td{background:rgba(192,132,252,.04)}
+.tbl-actions{display:flex;gap:.3rem}
+.tbl-btn{padding:.25rem .5rem;border:none;border-radius:5px;cursor:pointer;font-size:.7rem;transition:all .12s;font-weight:500}
+.tbl-btn.sell{background:rgba(34,197,94,.12);color:var(--green)}
+.tbl-btn.sell:hover{background:rgba(34,197,94,.25)}
+.tbl-btn.del{background:rgba(239,68,68,.12);color:var(--red)}
+.tbl-btn.del:hover{background:rgba(239,68,68,.25)}
+.tbl-btn.donne{background:rgba(249,115,22,.12);color:var(--orange)}
+.tbl-btn.donne:hover{background:rgba(249,115,22,.25)}
+.tbl-btn.detail{background:rgba(59,130,246,.12);color:var(--blue)}
+.tbl-btn.detail:hover{background:rgba(59,130,246,.25)}
+
+/* FAB */
+.fab{position:fixed;bottom:20px;right:max(12px,calc(50% - 250px));width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;font-size:1.6rem;box-shadow:0 4px 20px rgba(192,132,252,.4);cursor:pointer;z-index:100;transition:all .25s cubic-bezier(.34,1.56,.64,1);display:flex;align-items:center;justify-content:center;line-height:1}
+.fab:active{transform:scale(.9)}
+.fab.open{transform:rotate(45deg);box-shadow:0 2px 10px rgba(192,132,252,.3)}
+.fab-menu{position:fixed;bottom:80px;right:max(12px,calc(50% - 250px));z-index:99;display:flex;flex-direction:column;gap:8px;opacity:0;transform:translateY(16px) scale(.85);pointer-events:none;transition:all .25s cubic-bezier(.34,1.56,.64,1)}
+.fab-menu.open{opacity:1;transform:translateY(0) scale(1);pointer-events:all}
+.fab-menu button{display:flex;align-items:center;gap:8px;padding:10px 16px;border:none;border-radius:10px;font-size:.85rem;font-weight:600;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.35);transition:transform .12s;white-space:nowrap;backdrop-filter:blur(8px)}
+.fab-menu button:active{transform:scale(.95)}
+.fab-menu .fb-stock{background:rgba(59,130,246,.2);color:var(--blue);border:1px solid rgba(59,130,246,.3)}
+.fab-menu .fb-sell{background:rgba(34,197,94,.2);color:var(--green);border:1px solid rgba(34,197,94,.3)}
+.fab-menu .fb-donne{background:rgba(249,115,22,.2);color:var(--orange);border:1px solid rgba(249,115,22,.3)}
+
+/* OVERLAY + MODAL */
+.overlay{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.65);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);opacity:0;pointer-events:none;transition:opacity .25s}
+.overlay.open{opacity:1;pointer-events:all}
+.modal{position:fixed;bottom:0;left:0;right:0;z-index:201;background:var(--card);border-radius:20px 20px 0 0;padding:20px 18px max(20px,env(safe-area-inset-bottom));transform:translateY(100%);transition:transform .35s cubic-bezier(.34,1.56,.64,1);max-height:88dvh;overflow-y:auto;max-width:500px;margin:0 auto;border-top:1px solid var(--border)}
+.modal.open{transform:translateY(0)}
+.modal .handle{width:36px;height:4px;background:var(--muted2);border-radius:4px;margin:0 auto 14px}
+.modal h2{font-size:1.2rem;font-weight:700;margin-bottom:12px;color:var(--accent)}
+.modal p.desc{font-size:.85rem;color:var(--muted);margin-bottom:12px}
+
+/* FORM */
+.form-group{margin-bottom:10px}
+.form-group label{display:block;font-size:.72rem;font-weight:600;color:var(--muted);margin-bottom:3px;text-transform:uppercase;letter-spacing:.3px}
+.form-group input,.form-group select{width:100%;padding:.65rem .75rem;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.88rem;transition:border-color .15s}
+.form-group input:focus,.form-group select:focus{outline:none;border-color:var(--accent)}
+.form-group select option{background:var(--card);color:var(--text)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
+.form-actions{display:flex;gap:.6rem;margin-top:14px}
+.form-actions button{flex:1;padding:.75rem;border:none;border-radius:10px;font-size:.88rem;font-weight:600;cursor:pointer;transition:transform .1s}
+.form-actions button:active{transform:scale(.97)}
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
+.btn-secondary{background:var(--bg);color:var(--muted);border:1px solid var(--border)!important}
+
+/* DETAIL MODAL */
+.detail-body{margin:8px 0}
+.dl{display:flex;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid var(--border);font-size:.85rem}
+.dl:last-child{border:none}
+.dl .lb{color:var(--muted)}
+.dl .val{font-weight:600;text-align:right}
+.detail-actions{display:flex;gap:.6rem;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
+.detail-actions button{flex:1;padding:.65rem;border:none;border-radius:8px;font-weight:600;font-size:.82rem;cursor:pointer;transition:transform .1s}
+.detail-actions button:active{transform:scale(.97)}
+.da-sell{background:rgba(34,197,94,.15);color:var(--green)}
+.da-donne{background:rgba(249,115,22,.15);color:var(--orange)}
+.da-del{background:rgba(239,68,68,.15);color:var(--red)}
+
+/* SEARCH OVERLAY */
+.search-overlay{position:fixed;inset:0;z-index:150;background:var(--bg);opacity:0;pointer-events:none;transition:opacity .2s;display:flex;flex-direction:column}
+.search-overlay.open{opacity:1;pointer-events:all}
+.search-overlay .sh{display:flex;align-items:center;gap:.6rem;padding:.8rem .8rem;background:var(--card);border-bottom:1px solid var(--border)}
+.search-overlay .sh input{flex:1;border:none;padding:.7rem 0;font-size:1.05rem;outline:none;background:none;color:var(--text)}
+.search-overlay .sh input::placeholder{color:var(--muted2)}
+.search-overlay .sh .sc{font-size:1.2rem;background:none;border:none;cursor:pointer;color:var(--muted);padding:.2rem}
+.search-results{flex:1;overflow-y:auto;padding:.5rem .6rem}
+.sr-card{display:flex;align-items:center;gap:.6rem;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:.65rem .7rem;margin-bottom:.4rem;cursor:pointer;transition:all .15s;border-left:3px solid var(--muted)}
+.sr-card:active{transform:scale(.98)}
+.sr-card .info{flex:1;min-width:0}
+.sr-card .info .nom{font-weight:600;font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sr-card .info .det{font-size:.72rem;color:var(--muted);margin-top:1px}
+.sr-card .mnt{font-weight:700;font-size:.88rem;white-space:nowrap}
+
+/* TOAST */
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1e293b;color:#fff;padding:10px 20px;border-radius:10px;font-size:.85rem;font-weight:500;z-index:300;opacity:0;transition:all .3s cubic-bezier(.34,1.56,.64,1);pointer-events:none;white-space:nowrap;max-width:90vw;overflow:hidden;text-overflow:ellipsis;border:1px solid rgba(255,255,255,.08)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(-8px)}
+
+/* EMPTY STATE */
+.empty{text-align:center;padding:3rem 1rem;color:var(--muted2)}
+.empty .ei{font-size:3rem;margin-bottom:.6rem;opacity:.5}
+.empty p{font-size:.9rem}
+
+/* LOADING */
+.loading{text-align:center;padding:3rem;color:var(--muted)}
+.spin{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:s .7s linear infinite;margin:0 auto 8px}
+@keyframes s{to{transform:rotate(360deg)}}
+
+/* CONFIG SCREEN */
+.config-screen{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(8px);z-index:500;align-items:center;justify-content:center;padding:1rem}
+.config-screen.open{display:flex}
+.config-box{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;width:100%;max-width:420px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.config-box h2{font-size:1.1rem;font-weight:700;margin-bottom:4px;background:linear-gradient(135deg,var(--accent),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.config-box .sub{font-size:.8rem;color:var(--muted);margin-bottom:16px}
+.cfg-note{font-size:.75rem;color:var(--muted2);margin-top:8px;text-align:center;line-height:1.4}
+.config-box .form-group{margin-bottom:12px}
+.config-box .form-actions{margin-top:16px}
+.config-box .btn-primary{background:linear-gradient(135deg,var(--accent),var(--blue))}
+
+/* FOOTER */
+footer{text-align:center;margin-top:1.5rem;padding:.8rem;color:var(--muted2);font-size:.72rem;border-top:1px solid var(--border)}
+
+/* RESPONSIVE */
+@media(min-width:768px){
+.container{padding:1.2rem 1.5rem}
+header h1{font-size:2.2rem}
+.stats{grid-template-columns:repeat(6,1fr)}
+.grid{grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:.8rem}
+.fab{right:max(20px,calc(50% - 330px))}
+.fab-menu{right:max(20px,calc(50% - 330px))}
+.modal{border-radius:20px;bottom:auto;top:50%;left:50%;right:auto;transform:translate(-50%,-50%) scale(.9);max-height:85vh;max-width:460px;border:1px solid var(--border)}
+.modal.open{transform:translate(-50%,-50%) scale(1)}
+.modal .handle{display:none}
+}
+@media(min-width:1024px){
+.grid{display:none}
+.table-wrap{display:block}
+.stats{grid-template-columns:repeat(6,1fr)}
+}
+@media(max-width:767px){
+.table-wrap{display:none}
+.grid{display:grid}
+.stats{grid-template-columns:repeat(3,1fr)}
+.stats .stat:nth-child(n+4){display:none}
+.stats.expanded .stat:nth-child(n+4){display:block}
+.stats-toggle{display:flex!important}
+}
+@media(max-width:480px){
+.container{padding:.6rem .5rem}
+header h1{font-size:1.3rem}
+.stats{grid-template-columns:repeat(2,1fr)}
+.grid{grid-template-columns:1fr}
+.stat{padding:.5rem .6rem}
+.stat .num{font-size:1.1rem}
+}
+</style>
+</head>
+<body>
+
+<!-- CONFIG SCREEN -->
+<div class="config-screen" id="configScreen">
+  <div class="config-box">
+    <h2>⚙️ Configuration</h2>
+    <p class="sub">Connecte ta base Supabase</p>
+    <div class="form-group">
+      <label>URL Supabase</label>
+      <input id="cfgUrl" type="url" placeholder="https://supabase.sagetech.vip" value="https://supabase.sagetech.vip">
+    </div>
+    <div class="form-group">
+      <label>Clé anon (publique)</label>
+      <input id="cfgKey" type="text" placeholder="eyJ...">
+    </div>
+    <div class="form-group">
+      <label>Nom de la table</label>
+      <input id="cfgTable" type="text" placeholder="ventes" value="ventes">
+    </div>
+    <p class="cfg-note">La clé anon est publique par design — comme une clé Stripe publishable. <br>Elle est stockée uniquement dans ton navigateur.</p>
+    <div class="form-actions">
+      <button class="btn-secondary" onclick="closeConfig()" style="border:1px solid var(--border)!important">Annuler</button>
+      <button class="btn-primary" onclick="saveConfig()">💾 Connecter</button>
+    </div>
+  </div>
+</div>
+
+<!-- SEARCH OVERLAY -->
+<div class="search-overlay" id="searchOverlay">
+  <div class="sh">
+    <input id="searchInput" type="text" placeholder="🔍 Rechercher un article..." autofocus oninput="doSearch()">
+    <button class="sc" onclick="closeSearch()">✕</button>
+  </div>
+  <div class="search-results" id="searchResults">
+    <div class="empty"><div class="ei">🔍</div><p>Tape pour chercher</p></div>
+  </div>
+</div>
+
+<!-- OVERLAY + MODAL -->
+<div class="overlay" id="overlay"></div>
+<div class="modal" id="modal"></div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- MAIN -->
+<div class="container">
+
+<header>
+  <div class="hd-l">
+    <h1>Vinted2</h1>
+    <span class="sub" id="syncStatus">⏳</span>
+  </div>
+  <div class="hd-r">
+    <button class="search-btn" onclick="openSearch()" title="Rechercher">🔍</button>
+    <button class="config-btn" onclick="openConfig()" title="Configuration">⚙️</button>
+  </div>
+</header>
+
+<!-- STATS -->
+<div class="stats" id="statsBar">
+  <div class="stat accent" onclick="setFilter('all')">
+    <div class="icon">📦</div>
+    <div class="num" id="sTotal">0</div>
+    <div class="lbl">Articles</div>
+  </div>
+  <div class="stat blue" onclick="setFilter('en_stock')">
+    <div class="icon">📦</div>
+    <div class="num" id="sStock">0</div>
+    <div class="lbl">En stock</div>
+  </div>
+  <div class="stat green" onclick="setFilter('vendu')">
+    <div class="icon">💰</div>
+    <div class="num" id="sSold">0</div>
+    <div class="lbl">Vendus</div>
+  </div>
+  <div class="stat red" onclick="setFilter('donne')">
+    <div class="icon">🎁</div>
+    <div class="num" id="sDonne">0</div>
+    <div class="lbl">Donnés</div>
+  </div>
+  <div class="stat orange">
+    <div class="icon">📈</div>
+    <div class="num" id="sRevenue">0€</div>
+    <div class="lbl">Revenu</div>
+  </div>
+  <div class="stat accent">
+    <div class="icon">📊</div>
+    <div class="num" id="sMarge">0%</div>
+    <div class="lbl">Marge</div>
+  </div>
+</div>
+
+<!-- FILTER TABS -->
+<div class="tabs">
+  <div class="tab active" data-f="all" onclick="setFilter('all')">Tous <span class="cnt" id="cAll">0</span></div>
+  <div class="tab" data-f="en_stock" onclick="setFilter('en_stock')">📦 Stock <span class="cnt" id="cStock">0</span></div>
+  <div class="tab" data-f="vendu" onclick="setFilter('vendu')">💰 Vendus <span class="cnt" id="cSold">0</span></div>
+  <div class="tab" data-f="donne" onclick="setFilter('donne')">🎁 Donnés <span class="cnt" id="cDonne">0</span></div>
+</div>
+
+<!-- SEARCH BAR -->
+<div class="search-bar">
+  <span class="s-icon">🔍</span>
+  <input type="text" placeholder="Rechercher dans les articles..." oninput="doSearchInline()" id="inlineSearch">
+</div>
+
+<!-- GRID VIEW (mobile/tablet) -->
+<div class="grid" id="grid"></div>
+
+<!-- TABLE VIEW (desktop) -->
+<div class="table-wrap">
+  <table>
+    <thead><tr>
+      <th>Produit</th><th>Statut</th><th>💰 Achat</th><th>💰 Vente</th><th>📊 Marge</th><th>Fournisseur</th><th>Plateforme</th><th>📅 Date</th><th style="text-align:center">Actions</th>
+    </tr></thead>
+    <tbody id="tableBody"></tbody>
+  </table>
+</div>
+
+<footer>☁️ Supabase · <span id="footerDate"></span></footer>
+</div>
+
+<!-- FAB -->
+<button class="fab" id="fab" onclick="toggleFab()">＋</button>
+<div class="fab-menu" id="fabMenu">
+  <button class="fb-stock" onclick="showAddForm()"><span>📥</span> Nouvel article</button>
+  <button class="fb-sell" onclick="showSellPicker()"><span>💰</span> Vendre</button>
+  <button class="fb-donne" onclick="showDonnePicker()"><span>🎁</span> Donner</button>
+</div>
+
+<script>
+'use strict';
+
+// ============ CONFIG ============
+const CFG_KEY = 'vinted2_config';
+let config = loadConfig();
+
+function loadConfig() {
+  try {
+    const raw = localStorage.getItem(CFG_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch(_) {}
+  return { url: 'https://supabase.sagetech.vip', key: '', table: 'ventes' };
+}
+
+function saveConfig() {
+  config.url = document.getElementById('cfgUrl').value.trim();
+  config.key = document.getElementById('cfgKey').value.trim();
+  config.table = document.getElementById('cfgTable').value.trim() || 'ventes';
+  localStorage.setItem(CFG_KEY, JSON.stringify(config));
+  if (config.url && config.key) {
+    closeConfig();
+    toast('✅ Connecté');
+    loadData();
+  } else {
+    closeConfig();
+    toast('⚠️ Configure la clé pour utiliser Supabase');
+  }
+}
+
+function openConfig() {
+  document.getElementById('cfgUrl').value = config.url;
+  document.getElementById('cfgKey').value = config.key;
+  document.getElementById('cfgTable').value = config.table || 'ventes';
+  document.getElementById('configScreen').classList.add('open');
+}
+
+function closeConfig() {
+  document.getElementById('configScreen').classList.remove('open');
+}
+
+// ============ STATE ============
+let state = { items: [], filter: 'all', searchQ: '' };
+let debounceTimer;
+
+const F = n => (n||0).toLocaleString('fr-FR',{style:'currency',currency:'EUR'});
+const N = () => new Date().toISOString().slice(0,10);
+const $ = s => document.querySelector(s);
+const $$ = s => document.querySelectorAll(s);
+
+// ============ API ============
+async function api(path, opts = {}) {
+  if (!config.url || !config.key) throw new Error('Supabase non configuré');
+  const url = config.url + '/rest/v1/' + path;
+  const headers = {
+    apikey: config.key,
+    Authorization: 'Bearer ' + config.key,
+    'Content-Type': 'application/json',
+    ...(opts.headers || {})
+  };
+  if (!opts.method || opts.method === 'GET') headers.Prefer = 'count=exact';
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 12000);
+  try {
+    const res = await fetch(url, {
+      method: opts.method || 'GET',
+      headers,
+      body: opts.body ? JSON.stringify(opts.body) : undefined,
+      signal: controller.signal
+    });
+    clearTimeout(timer);
+    if (!res.ok) {
+      const txt = await res.text().catch(() => '');
+      throw new Error(`${res.status} ${txt.slice(0,200)}`);
+    }
+    if (opts.method === 'DELETE' || opts.method === 'PATCH' || res.status === 201) return true;
+    return await res.json();
+  } catch(e) {
+    clearTimeout(timer);
+    throw e;
+  }
+}
+
+// ============ TOAST ============
+function toast(msg) {
+  const t = $('#toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+function esc(s) {
+  if (!s) return '';
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+// ============ DATA ============
+async function loadData() {
+  const main = $('#grid');
+  if (!config.key) {
+    main.innerHTML = '<div class="empty"><div class="ei">⚙️</div><p>Configure Supabase pour commencer</p></div>';
+    $('#tableBody').innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:2rem">Configure Supabase</td></tr>';
+    setSync('⚙️', 'var(--yellow)');
+    return;
+  }
+  main.innerHTML = '<div class="loading"><div class="spin"></div><p>Chargement...</p></div>';
+  setSync('⏳', 'var(--muted)');
+  try {
+    const data = await api(config.table + '?order=id.desc');
+    state.items = Array.isArray(data) ? data : [];
+    render();
+    setSync('☁️', 'var(--green)');
+  } catch(e) {
+    state.items = [];
+    render();
+    main.innerHTML = '<div class="empty"><div class="ei">⚠️</div><p>' + esc(e.message) + '</p><button onclick="loadData()" style="margin-top:12px;padding:8px 20px;border:none;border-radius:8px;background:var(--accent);color:#fff;font-size:.85rem;font-weight:600;cursor:pointer">🔄 Réessayer</button></div>';
+    setSync('❌', 'var(--red)');
+  }
+}
+
+function setSync(text, color) {
+  const el = $('#syncStatus');
+  el.textContent = text;
+  el.style.color = color;
+}
+
+// ============ RENDER ============
+function render() {
+  const items = state.items;
+
+  // Stats
+  const stock = items.filter(d => d.statut === 'en_stock');
+  const sold = items.filter(d => d.statut === 'vendu');
+  const donne = items.filter(d => d.statut === 'donne');
+  const totalRev = sold.reduce((a,d) => a + (d.prix_vente||0), 0);
+  const totalCost = sold.reduce((a,d) => a + (d.prix_achat||0), 0);
+  const margeGlobal = totalRev - totalCost;
+  const txMarge = totalRev ? ((margeGlobal/totalRev)*100).toFixed(0) : 0;
+
+  $('#sTotal').textContent = items.length;
+  $('#sStock').textContent = stock.length;
+  $('#sSold').textContent = sold.length;
+  $('#sDonne').textContent = donne.length;
+  $('#sRevenue').textContent = F(totalRev);
+  $('#sMarge').textContent = txMarge + '%';
+
+  $('#cAll').textContent = items.length;
+  $('#cStock').textContent = stock.length;
+  $('#cSold').textContent = sold.length;
+  $('#cDonne').textContent = donne.length;
+
+  // Filter & search
+  const q = state.searchQ.toLowerCase().trim();
+  let filtered = items;
+  if (state.filter !== 'all') filtered = filtered.filter(d => d.statut === state.filter);
+  if (q) filtered = filtered.filter(d =>
+    (d.produit||'').toLowerCase().includes(q) ||
+    (d.fournisseur||'').toLowerCase().includes(q) ||
+    (d.plateforme||'').toLowerCase().includes(q) ||
+    (d.commentaire||'').toLowerCase().includes(q)
+  );
+
+  renderGrid(filtered);
+  renderTable(filtered);
+  $('#footerDate').textContent = new Date().toLocaleDateString('fr-FR', {day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'});
+}
+
+function renderGrid(items) {
+  const g = $('#grid');
+  if (!items.length) {
+    g.innerHTML = '<div class="empty"><div class="ei">' + (state.searchQ ? '🔍' : '📦') + '</div><p>' + (state.searchQ ? 'Aucun résultat' : 'Aucun article') + '</p></div>';
+    return;
+  }
+  g.innerHTML = items.map(d => {
+    const statutCls = d.statut === 'vendu' ? 'badge-vendu' : d.statut === 'donne' ? 'badge-donne' : 'badge-stock';
+    const statutLbl = d.statut === 'vendu' ? '💰 Vendu' : d.statut === 'donne' ? '🎁 Donné' : '📦 En stock';
+    const pAchat = d.prix_achat ? F(d.prix_achat) : null;
+    const pVente = d.prix_vente ? F(d.prix_vente) : null;
+    const displayPrix = d.statut === 'vendu' ? (pVente || '—') : (pAchat || '—');
+    const pCls = d.statut === 'vendu' ? 'green' : 'orange';
+    const marge = d.marge;
+    const mCls = marge > 0 ? 'pos' : marge < 0 ? 'neg' : '';
+    const date = d.date_vente || d.date_achat || '';
+    const plateforme = d.plateforme ? '<span>· ' + esc(d.plateforme) + '</span>' : '';
+
+    return `<div class="card" onclick="openDetail(${d.id})">
+      <div class="top">
+        <div class="nom">${esc(d.produit||'Sans nom')}</div>
+        <span class="badge ${statutCls}">${statutLbl}</span>
+      </div>
+      <div class="prix ${pCls}">${displayPrix}</div>
+      <div class="infos">
+        ${pAchat && d.statut !== 'vendu' ? '<span>💰 Achat ' + pAchat + '</span>' : ''}
+        ${marge != null ? '<span class="marge ' + mCls + '">📊 ' + F(marge) + '</span>' : ''}
+        ${plateforme}
+      </div>
+      <div class="bottom">
+        <span class="date">📅 ${date || '—'}</span>
+        ${d.fournisseur ? '<span style="font-size:.72rem;color:var(--muted2)">' + esc(d.fournisseur) + '</span>' : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderTable(items) {
+  const t = $('#tableBody');
+  if (!items.length) {
+    t.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:1.5rem">' + (state.searchQ ? 'Aucun résultat' : 'Aucun article') + '</td></tr>';
+    return;
+  }
+  t.innerHTML = items.map(d => {
+    const statutCls = d.statut === 'vendu' ? 'badge-vendu' : d.statut === 'donne' ? 'badge-donne' : 'badge-stock';
+    const statutLbl = d.statut === 'vendu' ? '💰 Vendu' : d.statut === 'donne' ? '🎁 Donné' : '📦 Stock';
+    const marge = d.marge;
+    const mCls = marge > 0 ? 'pos' : marge < 0 ? 'neg' : 'zero';
+    const date = d.date_vente || d.date_achat || '—';
+
+    let actions = '<button class="tbl-btn detail" onclick="event.stopPropagation();openDetail(' + d.id + ')">👁️</button>';
+    if (d.statut === 'en_stock') {
+      actions += '<button class="tbl-btn sell" onclick="event.stopPropagation();quickSell(' + d.id + ')">💰</button>';
+      actions += '<button class="tbl-btn donne" onclick="event.stopPropagation();quickDonne(' + d.id + ')">🎁</button>';
+    }
+    actions += '<button class="tbl-btn del" onclick="event.stopPropagation();quickDel(' + d.id + ')">🗑</button>';
+
+    return `<tr onclick="openDetail(${d.id})">
+      <td><strong>${esc(d.produit||'Sans nom')}</strong></td>
+      <td><span class="badge ${statutCls}">${statutLbl}</span></td>
+      <td>${d.prix_achat ? F(d.prix_achat) : '—'}</td>
+      <td>${d.prix_vente ? F(d.prix_vente) : '—'}</td>
+      <td class="${mCls}">${marge != null ? F(marge) : '—'}</td>
+      <td>${esc(d.fournisseur||'—')}</td>
+      <td>${esc(d.plateforme||'—')}</td>
+      <td>${date}</td>
+      <td style="text-align:center"><div class="tbl-actions" style="justify-content:center">${actions}</div></td>
+    </tr>`;
+  }).join('');
+}
+
+// ============ FILTER ============
+function setFilter(f) {
+  state.filter = f;
+  $$('.tab').forEach(t => t.classList.toggle('active', t.dataset.f === f));
+  render();
+}
+
+// ============ SEARCH ============
+function openSearch() {
+  $('#searchOverlay').classList.add('open');
+  $('#searchInput').value = '';
+  $('#searchResults').innerHTML = '<div class="empty"><div class="ei">🔍</div><p>Tape pour chercher</p></div>';
+  setTimeout(() => $('#searchInput').focus(), 200);
+}
+function closeSearch() { $('#searchOverlay').classList.remove('open'); }
+
+window.doSearch = function() {
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(() => {
+    const q = $('#searchInput').value.trim().toLowerCase();
+    if (!q) { $('#searchResults').innerHTML = '<div class="empty"><div class="ei">🔍</div><p>Tape pour chercher</p></div>'; return; }
+    const r = state.items.filter(d =>
+      (d.produit||'').toLowerCase().includes(q) ||
+      (d.fournisseur||'').toLowerCase().includes(q) ||
+      (d.plateforme||'').toLowerCase().includes(q) ||
+      (d.commentaire||'').toLowerCase().includes(q)
+    );
+    if (!r.length) { $('#searchResults').innerHTML = '<div class="empty"><div class="ei">🔍</div><p>Aucun résultat</p></div>'; return; }
+    $('#searchResults').innerHTML = r.map(d => {
+      const cls = d.statut === 'vendu' ? 'badge-vendu' : d.statut === 'donne' ? 'badge-donne' : 'badge-stock';
+      const lbl = d.statut === 'vendu' ? '💰 Vendu' : d.statut === 'donne' ? '🎁 Donné' : '📦 Stock';
+      return `<div class="sr-card" style="border-left-color:${d.statut==='vendu'?'var(--green)':d.statut==='donne'?'var(--red)':'var(--blue)'}" onclick="closeSearch();openDetail(${d.id})">
+        <div class="info">
+          <div class="nom">${highlight(esc(d.produit||''), q)}</div>
+          <div class="det">${lbl}${d.plateforme?' · '+esc(d.plateforme):''}${d.date_vente||d.date_achat?' · '+(d.date_vente||d.date_achat):''}</div>
+        </div>
+        <div class="mnt" style="color:${d.statut==='vendu'?'var(--green)':d.statut==='donne'?'var(--red)':'var(--blue)'}">${d.statut==='vendu'?F(d.prix_vente):d.prix_achat?F(d.prix_achat):'—'}</div>
+      </div>`;
+    }).join('');
+  }, 120);
+};
+
+function highlight(text, q) {
+  if (!q || !text) return text||'';
+  try {
+    const re = new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + ')', 'gi');
+    return text.replace(re, '<mark style="background:rgba(192,132,252,.3);color:var(--accent);padding:0 2px;border-radius:2px">$1</mark>');
+  } catch(_) { return text; }
+}
+
+window.doSearchInline = function() {
+  state.searchQ = $('#inlineSearch').value;
+  render();
+};
+
+// ============ FAB ============
+function toggleFab() {
+  $('#fab').classList.toggle('open');
+  $('#fabMenu').classList.toggle('open');
+}
+function closeFab() { $('#fab').classList.remove('open'); $('#fabMenu').classList.remove('open'); }
+
+// ============ MODAL ============
+function openModal(html) {
+  $('#overlay').classList.add('open');
+  $('#modal').classList.add('open');
+  $('#modal').innerHTML = html;
+}
+function closeModal() {
+  $('#overlay').classList.remove('open');
+  $('#modal').classList.remove('open');
+}
+$('#overlay').addEventListener('click', closeModal);
+
+// ============ DISTINCT VALUES ============
+function distinct(field) {
+  const s = new Set();
+  state.items.forEach(d => { if (d[field]) s.add(d[field]); });
+  return [...s].sort();
+}
+
+function selHtml(name, label, placeholder) {
+  const vals = distinct(name);
+  const id = 'sel-' + name;
+  return `<label>${label}</label>
+    <select id="${id}" onchange="toggleCustom('${name}')" style="width:100%;padding:.65rem .75rem;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.88rem;outline:none;appearance:auto">
+      <option value="">-- ${placeholder} --</option>
+      ${vals.map(v => '<option value="'+esc(v)+'">'+esc(v)+'</option>').join('')}
+      <option value="__new__">➕ Ajouter...</option>
+    </select>
+    <input id="custom-${name}" placeholder="${placeholder}" style="display:none;margin-top:6px;width:100%;padding:.65rem .75rem;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.88rem">`;
+}
+
+window.toggleCustom = function(name) {
+  const sel = $('#sel-'+name);
+  const inp = $('#custom-'+name);
+  inp.style.display = sel.value === '__new__' ? 'block' : 'none';
+  if (sel.value === '__new__') inp.focus();
+};
+
+function fieldVal(name) {
+  const sel = $('#sel-'+name);
+  const inp = $('#custom-'+name);
+  return sel.value === '__new__' ? (inp.value||null) : (sel.value||null);
+}
+
+// ============ ADD FORM ============
+function showAddForm() {
+  closeFab(); closeModal();
+  openModal(`
+    <div class="handle"></div>
+    <h2>📥 Nouvel article</h2>
+    <form onsubmit="addItem(event)">
+      <div class="form-group">
+        <label>Produit *</label>
+        <input name=produit required placeholder="Nom du produit">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>💰 Prix d'achat (€)</label>
+          <input name=prix_achat type=number step=0.01 placeholder="0.00">
+        </div>
+        <div class="form-group">
+          <label>📅 Date d'achat</label>
+          <input name=date_achat type=date value="${N()}">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">${selHtml('fournisseur','Fournisseur','Sélectionner')}</div>
+        <div class="form-group">${selHtml('source','Source','Sélectionner')}</div>
+      </div>
+      <div class="form-group">${selHtml('plateforme','Plateforme','Sélectionner')}</div>
+      <div class="form-group">
+        <label>Commentaire</label>
+        <input name=commentaire placeholder="Optionnel">
+      </div>
+      <div class="form-actions">
+        <button type=button class="btn-secondary" onclick="closeModal()">Annuler</button>
+        <button type=submit class="btn-primary">✅ Ajouter</button>
+      </div>
+    </form>
+  `);
+}
+
+async function addItem(e) {
+  e.preventDefault();
+  const fd = new FormData(e.target);
+  const data = {
+    produit: fd.get('produit'),
+    statut: 'en_stock',
+    prix_achat: fd.get('prix_achat') ? parseFloat(fd.get('prix_achat')) : null,
+    fournisseur: fieldVal('fournisseur'),
+    source: fieldVal('source'),
+    date_achat: fd.get('date_achat') ? fd.get('date_achat').split('-').reverse().join('/') : null,
+    plateforme: fieldVal('plateforme'),
+    commentaire: fd.get('commentaire') || null
+  };
+  try {
+    await api(config.table, { method: 'POST', body: data });
+    toast('✅ Article ajouté');
+    closeModal();
+    loadData();
+  } catch(e) { toast('❌ ' + e.message); }
+}
+
+// ============ SELL FLOW ============
+function showSellPicker() {
+  closeFab();
+  const stock = state.items.filter(d => d.statut === 'en_stock');
+  if (!stock.length) { toast('📦 Aucun article en stock'); return; }
+  openModal(`
+    <div class="handle"></div>
+    <h2>💰 Vendre un article</h2>
+    <p class="desc">Choisis l'article à marquer comme vendu :</p>
+    ${stock.map(d => `<div class="sr-card" style="border-left-color:var(--blue);margin-bottom:6px;cursor:pointer" onclick="closeModal();showSellForm(${d.id})">
+      <div class="info"><div class="nom">${esc(d.produit||'')}</div><div class="det">Acheté ${F(d.prix_achat)}${d.date_achat?' le '+d.date_achat:''}</div></div>
+      <div class="mnt">💰</div>
+    </div>`).join('')}
+    <div class="form-actions" style="margin-top:10px"><button class="btn-secondary" onclick="closeModal()" style="width:100%">Annuler</button></div>
+  `);
+}
+
+function showSellForm(id) {
+  const d = state.items.find(x => x.id === id);
+  if (!d) return;
+  openModal(`
+    <div class="handle"></div>
+    <h2>💰 Vendre : ${esc(d.produit||'')}</h2>
+    <form onsubmit="sellItem(event,${id})">
+      <div class="form-group">
+        <label>💰 Prix de vente (€) *</label>
+        <input name=prix_vente type=number step=0.01 required placeholder="0.00">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>📅 Date de vente</label>
+          <input name=date_vente type=date value="${N()}">
+        </div>
+        <div class="form-group">
+          <label>Plateforme</label>
+          <select name=plateforme style="width:100%;padding:.65rem .75rem;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.88rem;outline:none;appearance:auto">
+            <option value="">-- Sélectionner --</option>
+            ${distinct('plateforme').map(v => '<option value="'+esc(v)+'">'+esc(v)+'</option>').join('')}
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Dépense pub (€)</label>
+          <input name=depense_pub type=number step=0.01 placeholder="0.00" value="0">
+        </div>
+        <div class="form-group">
+          <label>Statut pub</label>
+          <input name=statut_pub placeholder="active, en_attente...">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Commentaire</label>
+        <input name=commentaire placeholder="Optionnel" value="${esc(d.commentaire||'')}">
+      </div>
+      <div class="form-actions">
+        <button type=button class="btn-secondary" onclick="closeModal()">Annuler</button>
+        <button type=submit class="btn-primary">✅ Vendu !</button>
+      </div>
+    </form>
+  `);
+}
+
+async function sellItem(e, id) {
+  e.preventDefault();
+  const fd = new FormData(e.target);
+  const d = state.items.find(x => x.id === id);
+  const pv = parseFloat(fd.get('prix_vente'));
+  const dv = fd.get('date_vente') ? fd.get('date_vente').split('-').reverse().join('/') : null;
+  const dp = fd.get('depense_pub') ? parseFloat(fd.get('depense_pub')) : 0;
+  const marge = (pv - (d.prix_achat||0)) - dp;
+  try {
+    await api(config.table + '?id=eq.' + id, {
+      method: 'PATCH',
+      body: {
+        statut: 'vendu', prix_vente: pv, date_vente: dv, marge,
+        plateforme: fd.get('plateforme') || d.plateforme || null,
+        depense_pub: dp || null, statut_pub: fd.get('statut_pub') || null,
+        commentaire: fd.get('commentaire') || d.commentaire || null
+      }
+    });
+    toast('💰 Vendu !');
+    closeModal();
+    loadData();
+  } catch(e) { toast('❌ ' + e.message); }
+}
+
+// ============ DONNE ============
+function showDonnePicker() {
+  closeFab();
+  const stock = state.items.filter(d => d.statut === 'en_stock');
+  if (!stock.length) { toast('📦 Aucun article en stock'); return; }
+  openModal(`
+    <div class="handle"></div>
+    <h2>🎁 Marquer comme donné</h2>
+    <p class="desc">Choisis l'article à marquer comme donné :</p>
+    ${stock.map(d => `<div class="sr-card" style="border-left-color:var(--orange);margin-bottom:6px;cursor:pointer" onclick="markDonne(${d.id})">
+      <div class="info"><div class="nom">${esc(d.produit||'')}</div><div class="det">Acheté ${F(d.prix_achat)}</div></div>
+      <div class="mnt">🎁</div>
+    </div>`).join('')}
+    <div class="form-actions" style="margin-top:10px"><button class="btn-secondary" onclick="closeModal()" style="width:100%">Annuler</button></div>
+  `);
+}
+
+async function markDonne(id) {
+  const d = state.items.find(x => x.id === id);
+  if (!d) return;
+  try {
+    await api(config.table + '?id=eq.' + id, {
+      method: 'PATCH',
+      body: { statut: 'donne', prix_vente: 0, marge: -(d.prix_achat||0), date_vente: null, commentaire: d.commentaire || 'donné' }
+    });
+    toast('🎁 Article donné');
+    closeModal();
+    loadData();
+  } catch(e) { toast('❌ ' + e.message); }
+}
+
+// ============ DETAIL ============
+function openDetail(id) {
+  const d = state.items.find(x => x.id === id);
+  if (!d) return;
+
+  const statutLbl = d.statut === 'vendu' ? '💰 Vendu' : d.statut === 'donne' ? '🎁 Donné' : '📦 En stock';
+  const sCls = d.statut === 'vendu' ? 'badge-vendu' : d.statut === 'donne' ? 'badge-donne' : 'badge-stock';
+  const marge = d.marge;
+  const mCls = marge > 0 ? 'pos' : marge < 0 ? 'neg' : '';
+
+  let lines = '';
+  const al = (l, v) => { if (v != null && v !== '') lines += '<div class="dl"><span class="lb">'+l+'</span><span class="val">'+v+'</span></div>'; };
+  al('Prix achat', d.prix_achat != null ? F(d.prix_achat) : null);
+  al('Prix vente', d.prix_vente != null ? F(d.prix_vente) : null);
+  if (marge != null) al('Marge', '<span style="color:'+(marge<0?'var(--red)':'var(--green)')+'">'+F(Math.abs(marge))+(marge<0?' (perte)':'')+'</span>');
+  al('Fournisseur', esc(d.fournisseur));
+  al('Source', esc(d.source));
+  al('Date achat', esc(d.date_achat));
+  al('Date vente', esc(d.date_vente));
+  al('Plateforme', esc(d.plateforme));
+  al('Dépense pub', d.depense_pub != null ? F(d.depense_pub) : null);
+  al('Commentaire', esc(d.commentaire));
+
+  let actions = '';
+  if (d.statut === 'en_stock') {
+    actions += '<button class="da-sell" onclick="closeModal();showSellForm('+d.id+')">💰 Vendre</button>';
+    actions += '<button class="da-donne" onclick="closeModal();markDonne('+d.id+')">🎁 Donner</button>';
+  }
+  actions += '<button class="da-del" onclick="quickDel('+d.id+')">🗑 Supprimer</button>';
+
+  openModal(`
+    <div class="handle"></div>
+    <div style="margin-bottom:4px">
+      <div style="font-size:1.2rem;font-weight:700;margin-bottom:4px">${esc(d.produit||'Sans nom')}</div>
+      <span class="badge ${sCls}">${statutLbl}</span>
+    </div>
+    <div class="detail-body">${lines || '<p style="color:var(--muted)">Aucune information</p>'}</div>
+    <div class="detail-actions">${actions}</div>
+  `);
+}
+
+// ============ QUICK ACTIONS ============
+function quickSell(id) {
+  closeModal();
+  showSellForm(id);
+}
+
+function quickDonne(id) {
+  if (!confirm('🎁 Marquer cet article comme donné ?')) return;
+  markDonne(id);
+}
+
+function quickDel(id) {
+  if (!confirm('🗑 Supprimer définitivement cet article ?')) return;
+  deleteItem(id);
+}
+
+async function deleteItem(id) {
+  try {
+    await api(config.table + '?id=eq.' + id, { method: 'DELETE' });
+    toast('🗑 Article supprimé');
+    closeModal();
+    loadData();
+  } catch(e) { toast('❌ ' + e.message); }
+}
+
+// ============ INIT ============
+document.addEventListener('DOMContentLoaded', () => {
+  if (config.key) {
+    loadData();
+  } else {
+    $('#grid').innerHTML = '<div class="empty"><div class="ei">⚙️</div><p>Configure Supabase pour commencer</p><button onclick="openConfig()" style="margin-top:12px;padding:10px 24px;border:none;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-size:.9rem;font-weight:600;cursor:pointer">⚙️ Configurer</button></div>';
+    $('#tableBody').innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:2rem">Configure Supabase pour commencer</td></tr>';
+    setSync('⚙️', 'var(--yellow)');
+  }
+  $('#footerDate').textContent = new Date().toLocaleDateString('fr-FR', {day:'numeric',month:'long',year:'numeric'});
+});
+
+// Close modal on Escape
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeModal(); closeSearch(); }
+});
+</script>
+</body>
+</html>
