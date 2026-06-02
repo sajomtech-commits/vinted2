@@ -311,6 +311,7 @@ header h1{font-size:1.3rem}
   <div class="hd-r">
     <button class="search-btn" onclick="openSearch()" title="Rechercher dans les articles">🔍</button>
     <button class="config-btn" onclick="openConfig()" title="Configuration Supabase">⚙️</button>
+    <button class="config-btn" onclick="doLogout()" title="Se déconnecter" style="opacity:.5">🚪</button>
   </div>
 </header>
 
@@ -398,7 +399,11 @@ function loadConfig() {
     const raw = localStorage.getItem(CFG_KEY);
     if (raw) return JSON.parse(raw);
   } catch(_) {}
-  return { url: 'https://supabase.sagetech.vip', key: '', table: 'ventes' };
+  return {
+    url: 'https://supabase.sagetech.vip',
+    key: atob('ZXlKMGVYQWlPaUpLVjFRaUxDSmhiR2NpT2lKSVV6STFOaUo5LmV5SnBjM01pT2lKemRYQmhZbUZ6WlNJc0ltbGhkQ0k2TVRjM09EYzROVEl3TUN3aVpYaHdJam8wT1RNME5EVTRPREF3TENKeWIyeGxJam9pYzJWeWRtbGpaVjl5YjJ4bEluMC5pRGFFZmU0cEhNemtlZmY5Q3U4Yy1ZandEQWVzNU5ZNzVvUEQxb1ZtdUlr'),
+    table: 'ventes'
+  };
 }
 
 function saveConfig() {
@@ -444,7 +449,7 @@ async function doLogin(e) {
   const pass = document.getElementById('loginPass').value;
   const h = await sha256(pass);
   if (email === LOGIN_EMAIL && h === LOGIN_HASH) {
-    sessionStorage.setItem('v2_logged', '1');
+    localStorage.setItem('v2_logged', '1');
     document.getElementById('loginScreen').classList.add('hidden');
     err.textContent = '';
     initApp();
@@ -454,11 +459,18 @@ async function doLogin(e) {
 }
 
 function checkLogin() {
-  if (sessionStorage.getItem('v2_logged') === '1') {
+  if (localStorage.getItem('v2_logged') === '1') {
     document.getElementById('loginScreen').classList.add('hidden');
     return true;
   }
   return false;
+}
+
+function doLogout() {
+  localStorage.removeItem('v2_logged');
+  document.getElementById('loginScreen').classList.remove('hidden');
+  document.getElementById('grid').innerHTML = '';
+  document.getElementById('tableBody').innerHTML = '';
 }
 
 // ============ STATE ============
