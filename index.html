@@ -93,6 +93,8 @@ tr:hover td{background:rgba(192,132,252,.04)}
 .tbl-btn.donne:hover{background:rgba(249,115,22,.25)}
 .tbl-btn.detail{background:rgba(59,130,246,.12);color:var(--blue)}
 .tbl-btn.detail:hover{background:rgba(59,130,246,.25)}
+.tbl-btn.edit{background:rgba(192,132,252,.12);color:var(--accent)}
+.tbl-btn.edit:hover{background:rgba(192,132,252,.25)}
 
 /* FAB */
 .fab{position:fixed;bottom:20px;right:max(12px,calc(50% - 250px));width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;font-size:1.6rem;box-shadow:0 4px 20px rgba(192,132,252,.4);cursor:pointer;z-index:100;transition:all .25s cubic-bezier(.34,1.56,.64,1);display:flex;align-items:center;justify-content:center;line-height:1}
@@ -139,6 +141,7 @@ tr:hover td{background:rgba(192,132,252,.04)}
 .detail-actions button:active{transform:scale(.97)}
 .da-sell{background:rgba(34,197,94,.15);color:var(--green)}
 .da-donne{background:rgba(249,115,22,.15);color:var(--orange)}
+.da-edit{background:rgba(192,132,252,.15);color:var(--accent)}
 .da-del{background:rgba(239,68,68,.15);color:var(--red)}
 
 /* SEARCH OVERLAY */
@@ -575,6 +578,7 @@ function renderTable(items) {
     const date = d.date_vente || d.date_achat || '—';
 
     let actions = '<button class="tbl-btn detail" onclick="event.stopPropagation();openDetail(' + d.id + ')" title="Voir le détail">👁️</button>';
+    actions += '<button class="tbl-btn edit" onclick="event.stopPropagation();quickEdit(' + d.id + ')" title="Modifier">✏️</button>';
     if (d.statut === 'en_stock') {
       actions += '<button class="tbl-btn sell" onclick="event.stopPropagation();quickSell(' + d.id + ')" title="Vendre cet article">💰</button>';
       actions += '<button class="tbl-btn donne" onclick="event.stopPropagation();quickDonne(' + d.id + ')" title="Marquer comme donné">🎁</button>';
@@ -901,7 +905,7 @@ function openDetail(id) {
   al('Dépense pub', d.depense_pub != null ? F(d.depense_pub) : null);
   al('Commentaire', esc(d.commentaire));
 
-  let actions = '';
+  let actions = '<button class="da-edit" onclick="closeModal();showEditForm('+d.id+')" title="Modifier tous les champs">✏️ Modifier</button>';
   if (d.statut === 'en_stock') {
     actions += '<button class="da-sell" onclick="closeModal();showSellForm('+d.id+')" title="Marquer comme vendu">💰 Vendre</button>';
     actions += '<button class="da-donne" onclick="closeModal();markDonne('+d.id+')" title="Marquer comme donné">🎁 Donner</button>';
@@ -919,6 +923,111 @@ function openDetail(id) {
   `);
 }
 
+// ============ EDIT FORM ============
+function showEditForm(id) {
+  const d = state.items.find(x => x.id === id);
+  if (!d) return;
+  const e = v => v != null ? String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') : '';
+  openModal(`
+    <div class="handle"></div>
+    <h2>✏️ Modifier : ${e(d.produit)}</h2>
+    <form onsubmit="editItem(event,${id})">
+      <div class="form-group">
+        <label>Produit</label>
+        <input name=produit required value="${e(d.produit)}">
+      </div>
+      <div class="form-group">
+        <label>Statut</label>
+        <select name=statut style="width:100%;padding:.65rem .75rem;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.88rem;outline:none;appearance:auto">
+          <option value="en_stock" ${d.statut==='en_stock'?'selected':''}>📦 En stock</option>
+          <option value="vendu" ${d.statut==='vendu'?'selected':''}>💰 Vendu</option>
+          <option value="donne" ${d.statut==='donne'?'selected':''}>🎁 Donné</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>💰 Prix achat (€)</label>
+          <input name=prix_achat type=number step=0.01 value="${e(d.prix_achat)}">
+        </div>
+        <div class="form-group">
+          <label>💰 Prix vente (€)</label>
+          <input name=prix_vente type=number step=0.01 value="${e(d.prix_vente)}">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>📅 Date achat</label>
+          <input name=date_achat type=date value="${d.date_achat ? d.date_achat.split('/').reverse().join('-') : ''}">
+        </div>
+        <div class="form-group">
+          <label>📅 Date vente</label>
+          <input name=date_vente type=date value="${d.date_vente ? d.date_vente.split('/').reverse().join('-') : ''}">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Fournisseur</label>
+          <input name=fournisseur value="${e(d.fournisseur)}">
+        </div>
+        <div class="form-group">
+          <label>Source</label>
+          <input name=source value="${e(d.source)}">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Plateforme</label>
+          <input name=plateforme value="${e(d.plateforme)}">
+        </div>
+        <div class="form-group">
+          <label>Dépense pub (€)</label>
+          <input name=depense_pub type=number step=0.01 value="${e(d.depense_pub)}">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Statut pub</label>
+          <input name=statut_pub value="${e(d.statut_pub)}">
+        </div>
+        <div class="form-group">
+          <label>📊 Marge (€)</label>
+          <input name=marge type=number step=0.01 value="${e(d.marge)}">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Commentaire</label>
+        <input name=commentaire value="${e(d.commentaire)}">
+      </div>
+      <div class="form-actions">
+        <button type=button class="btn-secondary" onclick="closeModal()" title="Annuler">Annuler</button>
+        <button type=submit class="btn-primary" title="Enregistrer les modifications">💾 Enregistrer</button>
+      </div>
+    </form>
+  `);
+}
+
+async function editItem(e, id) {
+  e.preventDefault();
+  const fd = new FormData(e.target);
+  const data = {};
+  for (const [k, v] of fd.entries()) {
+    if (v === '') { data[k] = null; continue; }
+    if (k === 'prix_achat' || k === 'prix_vente' || k === 'depense_pub' || k === 'marge') {
+      data[k] = parseFloat(v);
+    } else if (k === 'date_achat' || k === 'date_vente') {
+      data[k] = v.split('-').reverse().join('/');
+    } else {
+      data[k] = v;
+    }
+  }
+  try {
+    await api(config.table + '?id=eq.' + id, { method: 'PATCH', body: data });
+    toast('💾 Modifications enregistrées');
+    closeModal();
+    loadData();
+  } catch(e) { toast('❌ ' + e.message); closeModal(); }
+}
+
 // ============ QUICK ACTIONS ============
 function quickSell(id) {
   closeModal();
@@ -933,6 +1042,11 @@ function quickDonne(id) {
 function quickDel(id) {
   if (!confirm('🗑 Supprimer définitivement cet article ?')) return;
   deleteItem(id);
+}
+
+function quickEdit(id) {
+  closeModal();
+  showEditForm(id);
 }
 
 async function deleteItem(id) {
