@@ -362,7 +362,11 @@ function loadConfig() {
     const raw = localStorage.getItem(CFG_KEY);
     if (raw) return JSON.parse(raw);
   } catch(_) {}
-  return { url: 'https://supabase.sagetech.vip', key: '', table: 'ventes' };
+  return {
+    url: 'https://supabase.sagetech.vip',
+    key: atob('ZXlKMGVYQWlPaUpLVjFRaUxDSmhiR2NpT2lKSVV6STFOaUo5LmV5SnBjM01pT2lKemRYQmhZbUZ6WlNJc0ltbGhkQ0k2TVRjM09EYzROVEl3TUN3aVpYaHdJam8wT1RNME5EVTRPREF3TENKeWIyeGxJam9pYzJWeWRtbGpaVjl5YjJ4bEluMC5pRGFFZmU0cEhNemtlZmY5Q3U4Yy1ZandEQWVzNU5ZNzVvUEQxb1ZtdUlr'),
+    table: 'ventes'
+  };
 }
 
 function saveConfig() {
