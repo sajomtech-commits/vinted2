@@ -250,7 +250,7 @@ header h1{font-size:1.3rem}
 <div class="search-overlay" id="searchOverlay">
   <div class="sh">
     <input id="searchInput" type="text" placeholder="🔍 Rechercher un article..." autofocus oninput="doSearch()">
-    <button class="sc" onclick="closeSearch()">✕</button>
+    <button class="sc" onclick="closeSearch()" title="Fermer la recherche">✕</button>
   </div>
   <div class="search-results" id="searchResults">
     <div class="empty"><div class="ei">🔍</div><p>Tape pour chercher</p></div>
@@ -273,8 +273,8 @@ header h1{font-size:1.3rem}
     <span class="sub" id="syncStatus">⏳</span>
   </div>
   <div class="hd-r">
-    <button class="search-btn" onclick="openSearch()" title="Rechercher">🔍</button>
-    <button class="config-btn" onclick="openConfig()" title="Configuration">⚙️</button>
+    <button class="search-btn" onclick="openSearch()" title="Rechercher dans les articles">🔍</button>
+    <button class="config-btn" onclick="openConfig()" title="Configuration Supabase">⚙️</button>
   </div>
 </header>
 
@@ -343,11 +343,11 @@ header h1{font-size:1.3rem}
 </div>
 
 <!-- FAB -->
-<button class="fab" id="fab" onclick="toggleFab()">＋</button>
+<button class="fab" id="fab" onclick="toggleFab()" title="Actions rapides">＋</button>
 <div class="fab-menu" id="fabMenu">
-  <button class="fb-stock" onclick="showAddForm()"><span>📥</span> Nouvel article</button>
-  <button class="fb-sell" onclick="showSellPicker()"><span>💰</span> Vendre</button>
-  <button class="fb-donne" onclick="showDonnePicker()"><span>🎁</span> Donner</button>
+  <button class="fb-stock" onclick="showAddForm()" title="Ajouter un nouvel article"><span>📥</span> Nouvel article</button>
+  <button class="fb-sell" onclick="showSellPicker()" title="Marquer un article comme vendu"><span>💰</span> Vendre</button>
+  <button class="fb-donne" onclick="showDonnePicker()" title="Marquer un article comme donné"><span>🎁</span> Donner</button>
 </div>
 
 <script>
@@ -574,12 +574,12 @@ function renderTable(items) {
     const mCls = marge > 0 ? 'pos' : marge < 0 ? 'neg' : 'zero';
     const date = d.date_vente || d.date_achat || '—';
 
-    let actions = '<button class="tbl-btn detail" onclick="event.stopPropagation();openDetail(' + d.id + ')">👁️</button>';
+    let actions = '<button class="tbl-btn detail" onclick="event.stopPropagation();openDetail(' + d.id + ')" title="Voir le détail">👁️</button>';
     if (d.statut === 'en_stock') {
-      actions += '<button class="tbl-btn sell" onclick="event.stopPropagation();quickSell(' + d.id + ')">💰</button>';
-      actions += '<button class="tbl-btn donne" onclick="event.stopPropagation();quickDonne(' + d.id + ')">🎁</button>';
+      actions += '<button class="tbl-btn sell" onclick="event.stopPropagation();quickSell(' + d.id + ')" title="Vendre cet article">💰</button>';
+      actions += '<button class="tbl-btn donne" onclick="event.stopPropagation();quickDonne(' + d.id + ')" title="Marquer comme donné">🎁</button>';
     }
-    actions += '<button class="tbl-btn del" onclick="event.stopPropagation();quickDel(' + d.id + ')">🗑</button>';
+    actions += '<button class="tbl-btn del" onclick="event.stopPropagation();quickDel(' + d.id + ')" title="Supprimer définitivement">🗑</button>';
 
     return `<tr onclick="openDetail(${d.id})">
       <td><strong>${esc(d.produit||'Sans nom')}</strong></td>
@@ -659,17 +659,13 @@ function closeFab() { $('#fab').classList.remove('open'); $('#fabMenu').classLis
 
 // ============ MODAL ============
 function openModal(html) {
-  $('#modal').innerHTML = html;
-  // Force reflow before adding class to ensure CSS transition fires
-  void $('#modal').offsetHeight;
   $('#overlay').classList.add('open');
   $('#modal').classList.add('open');
+  $('#modal').innerHTML = html;
 }
 function closeModal() {
   $('#overlay').classList.remove('open');
   $('#modal').classList.remove('open');
-  // Clear content after transition to prevent stale form state
-  setTimeout(() => { $('#modal').innerHTML = ''; }, 400);
 }
 $('#overlay').addEventListener('click', closeModal);
 
@@ -736,8 +732,8 @@ function showAddForm() {
         <input name=commentaire placeholder="Optionnel">
       </div>
       <div class="form-actions">
-        <button type=button class="btn-secondary" onclick="closeModal()">Annuler</button>
-        <button type=submit class="btn-primary">✅ Ajouter</button>
+        <button type=button class="btn-secondary" onclick="closeModal()" title="Annuler">Annuler</button>
+        <button type=submit class="btn-primary" title="Ajouter cet article à la base">✅ Ajouter</button>
       </div>
     </form>
   `);
@@ -777,7 +773,7 @@ function showSellPicker() {
       <div class="info"><div class="nom">${esc(d.produit||'')}</div><div class="det">Acheté ${F(d.prix_achat)}${d.date_achat?' le '+d.date_achat:''}</div></div>
       <div class="mnt">💰</div>
     </div>`).join('')}
-    <div class="form-actions" style="margin-top:10px"><button class="btn-secondary" onclick="closeModal()" style="width:100%">Annuler</button></div>
+    <div class="form-actions" style="margin-top:10px"><button class="btn-secondary" onclick="closeModal()" style="width:100%" title="Annuler">Annuler</button></div>
   `);
 }
 
@@ -820,8 +816,8 @@ function showSellForm(id) {
         <input name=commentaire placeholder="Optionnel" value="${esc(d.commentaire||'')}">
       </div>
       <div class="form-actions">
-        <button type=button class="btn-secondary" onclick="closeModal()">Annuler</button>
-        <button type=submit class="btn-primary">✅ Vendu !</button>
+        <button type=button class="btn-secondary" onclick="closeModal()" title="Annuler">Annuler</button>
+        <button type=submit class="btn-primary" title="Valider la vente">✅ Vendu !</button>
       </div>
     </form>
   `);
@@ -864,7 +860,7 @@ function showDonnePicker() {
       <div class="info"><div class="nom">${esc(d.produit||'')}</div><div class="det">Acheté ${F(d.prix_achat)}</div></div>
       <div class="mnt">🎁</div>
     </div>`).join('')}
-    <div class="form-actions" style="margin-top:10px"><button class="btn-secondary" onclick="closeModal()" style="width:100%">Annuler</button></div>
+    <div class="form-actions" style="margin-top:10px"><button class="btn-secondary" onclick="closeModal()" style="width:100%" title="Annuler">Annuler</button></div>
   `);
 }
 
@@ -907,10 +903,10 @@ function openDetail(id) {
 
   let actions = '';
   if (d.statut === 'en_stock') {
-    actions += '<button class="da-sell" onclick="closeModal();showSellForm('+d.id+')">💰 Vendre</button>';
-    actions += '<button class="da-donne" onclick="closeModal();markDonne('+d.id+')">🎁 Donner</button>';
+    actions += '<button class="da-sell" onclick="closeModal();showSellForm('+d.id+')" title="Marquer comme vendu">💰 Vendre</button>';
+    actions += '<button class="da-donne" onclick="closeModal();markDonne('+d.id+')" title="Marquer comme donné">🎁 Donner</button>';
   }
-  actions += '<button class="da-del" onclick="quickDel('+d.id+')">🗑 Supprimer</button>';
+  actions += '<button class="da-del" onclick="quickDel('+d.id+')" title="Supprimer définitivement">🗑 Supprimer</button>';
 
   openModal(`
     <div class="handle"></div>
