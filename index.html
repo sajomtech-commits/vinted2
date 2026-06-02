@@ -234,14 +234,14 @@ header h1{font-size:1.3rem}
       <input id="cfgUrl" type="url" placeholder="https://supabase.sagetech.vip" value="https://supabase.sagetech.vip">
     </div>
     <div class="form-group">
-      <label>Clé anon (publique)</label>
-      <input id="cfgKey" type="text" placeholder="eyJ...">
+      <label>Clé API Supabase</label>
+      <input id="cfgKey" type="password" placeholder="eyJ...">
     </div>
     <div class="form-group">
       <label>Nom de la table</label>
       <input id="cfgTable" type="text" placeholder="ventes" value="ventes">
     </div>
-    <p class="cfg-note">La clé anon est publique par design — comme une clé Stripe publishable. <br>Elle est stockée uniquement dans ton navigateur.</p>
+    <p class="cfg-note">🔒 Stockée uniquement dans ton navigateur (localStorage). <br>Personne ne peut la voir — pas même le code source du site.</p>
     <div class="form-actions">
       <button class="btn-secondary" onclick="closeConfig()" style="border:1px solid var(--border)!important">Annuler</button>
       <button class="btn-primary" onclick="saveConfig()">💾 Connecter</button>
