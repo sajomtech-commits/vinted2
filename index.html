@@ -109,8 +109,8 @@ tr:hover td{background:rgba(192,132,252,.04)}
 /* OVERLAY + MODAL */
 .overlay{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.65);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);opacity:0;pointer-events:none;transition:opacity .25s}
 .overlay.open{opacity:1;pointer-events:all}
-.modal{position:fixed;bottom:0;left:0;right:0;z-index:201;background:var(--card);border-radius:20px 20px 0 0;padding:20px 18px max(20px,env(safe-area-inset-bottom));transform:translateY(100%);transition:transform .35s cubic-bezier(.34,1.56,.64,1);max-height:88dvh;overflow-y:auto;max-width:500px;margin:0 auto;border-top:1px solid var(--border)}
-.modal.open{transform:translateY(0)}
+.modal{position:fixed;bottom:0;left:0;right:0;z-index:201;background:var(--card);border-radius:20px 20px 0 0;padding:20px 18px max(20px,env(safe-area-inset-bottom));transform:translateY(100%) scale(.95);transition:transform .35s cubic-bezier(.34,1.56,.64,1),visibility .35s;max-height:88dvh;overflow-y:auto;max-width:500px;margin:0 auto;border-top:1px solid var(--border);visibility:hidden}
+.modal.open{transform:translateY(0);visibility:visible}
 .modal .handle{width:36px;height:4px;background:var(--muted2);border-radius:4px;margin:0 auto 14px}
 .modal h2{font-size:1.2rem;font-weight:700;margin-bottom:12px;color:var(--accent)}
 .modal p.desc{font-size:.85rem;color:var(--muted);margin-bottom:12px}
@@ -192,8 +192,8 @@ header h1{font-size:2.2rem}
 .grid{grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:.8rem}
 .fab{right:max(20px,calc(50% - 330px))}
 .fab-menu{right:max(20px,calc(50% - 330px))}
-.modal{border-radius:20px;bottom:auto;top:50%;left:50%;right:auto;transform:translate(-50%,-50%) scale(.9);max-height:85vh;max-width:460px;border:1px solid var(--border)}
-.modal.open{transform:translate(-50%,-50%) scale(1)}
+.modal{border-radius:20px;bottom:auto;top:50%;left:50%;right:auto;transform:translate(-50%,-50%) scale(.9);max-height:85vh;max-width:460px;border:1px solid var(--border);visibility:hidden}
+.modal.open{transform:translate(-50%,-50%) scale(1);visibility:visible}
 .modal .handle{display:none}
 }
 @media(min-width:1024px){
@@ -659,13 +659,17 @@ function closeFab() { $('#fab').classList.remove('open'); $('#fabMenu').classLis
 
 // ============ MODAL ============
 function openModal(html) {
+  $('#modal').innerHTML = html;
+  // Force reflow before adding class to ensure CSS transition fires
+  void $('#modal').offsetHeight;
   $('#overlay').classList.add('open');
   $('#modal').classList.add('open');
-  $('#modal').innerHTML = html;
 }
 function closeModal() {
   $('#overlay').classList.remove('open');
   $('#modal').classList.remove('open');
+  // Clear content after transition to prevent stale form state
+  setTimeout(() => { $('#modal').innerHTML = ''; }, 400);
 }
 $('#overlay').addEventListener('click', closeModal);
 
@@ -757,7 +761,7 @@ async function addItem(e) {
     toast('✅ Article ajouté');
     closeModal();
     loadData();
-  } catch(e) { toast('❌ ' + e.message); }
+  } catch(e) { toast('❌ ' + e.message); closeModal(); }
 }
 
 // ============ SELL FLOW ============
@@ -844,7 +848,7 @@ async function sellItem(e, id) {
     toast('💰 Vendu !');
     closeModal();
     loadData();
-  } catch(e) { toast('❌ ' + e.message); }
+  } catch(e) { toast('❌ ' + e.message); closeModal(); }
 }
 
 // ============ DONNE ============
@@ -875,7 +879,7 @@ async function markDonne(id) {
     toast('🎁 Article donné');
     closeModal();
     loadData();
-  } catch(e) { toast('❌ ' + e.message); }
+  } catch(e) { toast('❌ ' + e.message); closeModal(); }
 }
 
 // ============ DETAIL ============
@@ -941,7 +945,7 @@ async function deleteItem(id) {
     toast('🗑 Article supprimé');
     closeModal();
     loadData();
-  } catch(e) { toast('❌ ' + e.message); }
+  } catch(e) { toast('❌ ' + e.message); closeModal(); }
 }
 
 // ============ INIT ============
